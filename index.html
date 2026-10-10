@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aeloria · 悬浮之境</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+
+    <div id="hud" class="hidden">
+      <div id="stormTint"></div>
+      <div id="vignette"></div>
+      <div id="tags"></div>
+      <div id="standings" class="standings"></div>
+      <div class="hud-top">
+        <div class="panel" id="placePanel">
+          <div class="label">名次</div>
+          <div class="value" id="placeValue">1 / 5</div>
+        </div>
+        <div class="panel">
+          <div class="label" id="lapLabel">圈数</div>
+          <div class="value" id="lapValue">1 / 3</div>
+        </div>
+        <div class="panel wide">
+          <div class="label">用时</div>
+          <div class="value big" id="timeValue">00:00.00</div>
+          <div class="sub" id="bestValue">最佳 --:--.--</div>
+        </div>
+        <div class="panel">
+          <div class="label">光环</div>
+          <div class="value" id="ringValue">0 / 28</div>
+        </div>
+      </div>
+      <div id="stormBanner" class="storm-banner"></div>
+      <div id="message" class="message"></div>
+      <div id="ringMarker" class="ring-marker"><div class="diamond"></div><span id="ringDist"></span></div>
+      <div id="ringArrow" class="ring-arrow"></div>
+      <div class="hud-bottom">
+        <div class="gauge">
+          <div class="label">速度 <span class="unit">km/h</span></div>
+          <div class="value" id="speedValue">0</div>
+          <div class="bar"><div id="speedBar"></div></div>
+        </div>
+        <div class="gauge">
+          <div class="label">灵能</div>
+          <div class="bar energy"><div id="energyBar"></div></div>
+        </div>
+        <div class="gauge small">
+          <div class="label">高度 <span class="unit">m</span></div>
+          <div class="value" id="altValue">0</div>
+        </div>
+      </div>
+      <canvas id="minimap" width="200" height="200"></canvas>
+      <div id="flashOverlay"></div>
+    </div>
+
+    <div id="menu" class="overlay hidden">
+      <div class="menu-card">
+        <div class="title">AELORIA</div>
+        <div class="subtitle">悬浮之境 · 风暴竞速</div>
+        <p class="lore">
+          在潘多拉遥远的星系边缘，Aeloria 的群山被磁通涡流托举在无尽云海之上。古老的纳美部族在山间点亮光环，
+          作为成年礼的飞行赛道。乘上你的伊卡兰，穿过所有光环——但要当心：风暴总在你飞得最快的时候到来。
+        </p>
+        <div class="menu-buttons">
+          <button id="btnRace" class="btn primary">开始竞速 <small>3 圈 · 4 位对手</small></button>
+          <button id="btnFree" class="btn">自由飞行</button>
+        </div>
+        <div class="best-line">最佳成绩：<span id="menuBest">--:--.--</span></div>
+        <div class="settings">
+          <label><input type="checkbox" id="optQuality" /> 高画质（泛光）</label>
+          <label><input type="checkbox" id="optInvert" /> 反转 Y 轴</label>
+          <label>对手难度
+            <select id="optDiff">
+              <option value="easy">简单</option>
+              <option value="normal">普通</option>
+              <option value="hard">困难</option>
+            </select>
+          </label>
+          <label class="slider">鼠标灵敏度 <input type="range" id="optSens" min="0.3" max="2.5" step="0.1" /></label>
+        </div>
+        <div class="controls">
+          <div><kbd>鼠标</kbd> <kbd>W A S D</kbd> <kbd>方向键</kbd><span>转向 / 俯仰（W 抬头）</span></div>
+          <div><kbd>空格</kbd> <kbd>左键</kbd><span>振翅加速</span></div>
+          <div><kbd>Shift</kbd> <kbd>右键</kbd><span>灵能冲刺</span></div>
+          <div><kbd>N</kbd><span>昼夜切换</span> <kbd>T</kbd><span>召唤风暴</span> <kbd>C</kbd><span>切换视角</span></div>
+          <div><kbd>M</kbd><span>静音</span> <kbd>Esc</kbd><span>暂停</span> <kbd>R</kbd><span>重新开始</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pause" class="overlay hidden">
+      <div class="menu-card compact">
+        <div class="title small">已暂停</div>
+        <div class="menu-buttons">
+          <button id="btnResume" class="btn primary">继续飞行</button>
+          <button id="btnRestart" class="btn">重新开始</button>
+          <button id="btnMenu" class="btn">返回主菜单</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="results" class="overlay hidden">
+      <div class="menu-card compact">
+        <div class="title small" id="resTitle">竞速完成</div>
+        <div class="result-place" id="resPlace"></div>
+        <div id="recordBadge" class="record hidden">✦ 新纪录 ✦</div>
+        <div class="result-time" id="resTotal">00:00.00</div>
+        <div class="result-standings" id="resStandings"></div>
+        <div class="result-grid" id="resGrid"></div>
+        <div class="menu-buttons">
+          <button id="btnAgain" class="btn primary">再来一次</button>
+          <button id="btnResMenu" class="btn">返回主菜单</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loading" class="overlay">
+      <div class="loading-inner">
+        <div class="title">AELORIA</div>
+        <div class="loading-text">正在托起群山……</div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

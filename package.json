@@ -1,0 +1,18 @@
+{
+  "name": "aeloria",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Aeloria — 阿凡达风格的悬浮群山飞行竞速世界（Three.js）",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "vite": "5.4.11"
+  }
+}
